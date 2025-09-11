@@ -11,32 +11,24 @@ graph TB
     F --> G[StarterKit]
     F --> H[Collaboration]
     F --> I[CollaborationCursor]
-    F --> J[Custom Extensions]
-    
-    J --> K[CustomBold]
-    J --> L[CustomItalic]
-    J --> M[Placeholder]
-    J --> N[EmojiExtension]
-    J --> O[MentionExtension]
     
     H --> E
     I --> E
-    I --> P[WebSocket Provider]
+    I --> J[WebSocket Client]
     
-    P --> Q[WebSocket Server]
+    J --> K[WebSocket Server]
+    K --> L[Document Storage]
     
-    R[ExtensionManager] --> F
-    
-    S[User Interface] --> B
-    T[Real-time Updates] --> B
+    M[User Interface] --> B
+    N[Real-time Updates] --> B
     
     style A fill:#f9f,stroke:#333
     style B fill:#bbf,stroke:#333
     style C fill:#bfb,stroke:#333
     style F fill:#fbb,stroke:#333
-    style J fill:#fbb,stroke:#333
-    style P fill:#ffb,stroke:#333
-    style R fill:#bfb,stroke:#333
+    style J fill:#ffb,stroke:#333
+    style K fill:#fbb,stroke:#333
+    style L fill:#bfb,stroke:#333
 ```
 
 ## Component Relationships
@@ -49,12 +41,12 @@ graph TB
    - **Extensions** for additional features
 4. **Extensions** include:
    - Core Tiptap extensions (StarterKit, Collaboration, etc.)
-   - Custom extensions (CustomBold, CustomItalic, etc.)
 5. **Collaboration extensions** connect to:
    - **Yjs Document** for shared state
-   - **WebSocket Provider** for real-time communication
-6. **WebSocket Provider** connects to **WebSocket Server**
-7. **ExtensionManager** manages all extensions
+   - **WebSocket Client** for real-time communication
+6. **WebSocket Client** connects to **WebSocket Server**
+7. **WebSocket Server** manages:
+   - **Document Storage** for persistent document state
 8. **User Interface** and **Real-time Updates** interact with the editor
 
 ## Data Flow
@@ -63,7 +55,36 @@ graph TB
 2. Commands are processed by Tiptap Core
 3. Changes are applied to the Yjs Document
 4. Yjs synchronizes changes with other clients via WebSocket
-5. Remote changes are received through WebSocket Provider
-6. Yjs applies remote changes to the document
-7. Tiptap Core updates the editor view
-8. UI reflects the updated state
+5. **WebSocket Client** sends updates to **WebSocket Server**
+6. **WebSocket Server** broadcasts updates to all connected clients
+7. **WebSocket Client** receives remote changes
+8. Yjs applies remote changes to the document
+9. Tiptap Core updates the editor view
+10. UI reflects the updated state
+
+## Recent Updates
+
+1. **Simplified Extension System**: Removed the custom ExtensionManager to resolve runtime errors
+2. **Direct Extension Usage**: Using Tiptap extensions directly instead of through a manager
+3. **WebSocket Server**: Simplified implementation that works with available dependencies
+4. **Document Storage**: In-memory storage for documents (can be extended with databases)
+
+## Deployment Considerations
+
+For production deployment:
+
+1. **WebSocket Server**:
+   - Use a robust WebSocket server implementation
+   - Implement proper error handling and logging
+   - Add authentication and authorization
+   - Use a database for document persistence
+
+2. **Client-Side**:
+   - Implement reconnection logic
+   - Add error handling for network issues
+   - Optimize performance for large documents
+
+3. **Security**:
+   - Validate all incoming data
+   - Implement rate limiting
+   - Add encryption for sensitive data

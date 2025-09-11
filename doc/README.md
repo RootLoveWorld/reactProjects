@@ -9,49 +9,69 @@ Currently, two official plugins are available:
 
 ## Collaborative Rich Text Editor
 
-This project has been extended with a collaborative rich text editor implementation using:
+This project implements a collaborative rich text editor using Tiptap and Yjs with a plugin-based approach for extending core functionality.
 
-- [Tiptap](https://tiptap.dev/) - A headless editor framework
-- [Yjs](https://yjs.dev/) - A CRDT for real-time collaboration
-- Plugin-based architecture for extensibility
+## Features
 
-### Features
+- Real-time collaborative editing
+- Rich text formatting (bold, italic, headings, lists, etc.)
+- Emoji insertion
+- Mention functionality
+- Connection status indicators
+- User presence indicators
 
-1. **Real-time Collaboration**: Multiple users can edit the same document simultaneously
-2. **Presence Indicators**: See other users' cursors and selections
-3. **Plugin-based Architecture**: Extensible through custom extensions
-4. **Rich Text Editing**: Standard formatting options (bold, italic, headings, lists, etc.)
-5. **Advanced Features**: Emoji conversion, mentions, and custom extensions
+## Prerequisites
 
-### Architecture
+- Node.js (version 16 or higher)
+- npm or yarn
 
-The editor follows a plugin-based approach where functionality is added through extensions:
+## Installation
 
-- **Core Extensions**: Provided by Tiptap (StarterKit, Collaboration, etc.)
-- **Custom Extensions**: Built-in extensions for specific functionality
-- **Third-party Extensions**: Additional features from the Tiptap ecosystem
+1. Clone the repository
+2. Navigate to the project directory
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-### Extensions Included
+## Running the Application
 
-1. **CustomBold/CustomItalic**: Enhanced versions of basic formatting
-2. **Placeholder**: Shows placeholder text when editor is empty
-3. **EmojiExtension**: Converts text shortcuts to emojis (e.g., :) → 🙂)
-4. **MentionExtension**: Allows mentioning other users with @
-
-### How to Run
-
-1. **Start the WebSocket Server**:
+1. Start the WebSocket server:
    ```bash
    npm run server
    ```
-
-2. **Start the Development Server**:
+   
+2. In a separate terminal, start the development server:
    ```bash
    npm run dev
    ```
+   
+3. Open your browser and navigate to `http://localhost:5173` (or the port shown in the terminal)
 
-3. **Open in Browser**:
-   Visit `http://localhost:5173` (or the URL provided by Vite)
+## Project Structure
+
+- `src/components/CollaborativeEditor.tsx` - Main collaborative editor component
+- `src/components/SimpleEditor.tsx` - Simple Tiptap editor for testing
+- `src/components/WebsocketTest.tsx` - WebSocket connectivity test component
+- `server/server.js` - WebSocket server implementation
+- `src/extensions/` - Custom Tiptap extensions
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Make sure the WebSocket server is running on port 1235
+2. Check the browser console for any errors
+3. Verify that all dependencies are installed correctly
+4. Ensure there are no port conflicts (the server uses port 1235)
+
+## Dependencies
+
+- React 18+
+- Tiptap (v2)
+- Yjs
+- y-websocket
+- WebSocket (ws)
 
 ## Expanding the ESLint configuration
 
@@ -112,4 +132,3 @@ export default tseslint.config([
     },
   },
 ])
-```

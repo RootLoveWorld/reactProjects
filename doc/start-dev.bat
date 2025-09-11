@@ -1,0 +1,6 @@
+@echo off
+echo Starting WebSocket server...
+start "WebSocket Server" cmd /k "cd /d d:\reactLearn\reactProjects\doc && node server/server.js"
+timeout /t 3 /nobreak >nul
+echo Starting development server...
+start "Dev Server" cmd /k "cd /d d:\reactLearn\reactProjects\doc && npm run dev"

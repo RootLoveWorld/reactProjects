@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #status { padding: 10px; margin: 10px 0; }
+        #messages { border: 1px solid #ccc; padding: 10px; min-height: 100px; }
+        .connected { background-color: #d4edda; color: #155724; }
+        .disconnected { background-color: #f8d7da; color: #721c24; }
+        .error { background-color: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Test</h1>
+    <div id="status">Connecting...</div>
+    <div id="messages"></div>
+    
+    <script>
+        const status = document.getElementById('status');
+        const messages = document.getElementById('messages');
+        
+        function addMessage(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+        
+        try {
+            const ws = new WebSocket('ws://localhost:1235');
+            
+            ws.onopen = () => {
+                status.textContent = 'Connected to WebSocket server';
+                status.className = 'connected';
+                addMessage('Connected to server');
+            };
+            
+            ws.onmessage = (event) => {
+                addMessage('Received: ' + event.data);
+            };
+            
+            ws.onclose = () => {
+                status.textContent = 'Disconnected from WebSocket server';
+                status.className = 'disconnected';
+                addMessage('Disconnected from server');
+            };
+            
+            ws.onerror = (error) => {
+                status.textContent = 'WebSocket error: ' + error;
+                status.className = 'error';
+                addMessage('WebSocket error: ' + error);
+            };
+        } catch (error) {
+            status.textContent = 'Failed to create WebSocket: ' + error;
+            status.className = 'error';
+            addMessage('Failed to create WebSocket: ' + error);
+        }
+    </script>
+</body>
+</html>

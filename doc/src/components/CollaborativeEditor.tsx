@@ -1,54 +1,25 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EditorProvider, useCurrentEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Collaboration from '@tiptap/extension-collaboration';
 import CollaborationCursor from '@tiptap/extension-collaboration-cursor';
 import * as Y from 'yjs';
-import { WebsocketProvider } from 'y-websocket';
-// Import our extension manager
-import extensionManager from '../extensions/ExtensionManager';
+import { Extension } from '@tiptap/core';
 
-// Create a Yjs document
-const ydoc = new Y.Doc();
-
-// Create a WebSocket provider (you would replace this with your own server URL)
-const provider = new WebsocketProvider('ws://localhost:1234', 'tiptap-demo', ydoc);
+// Define a basic interface for WebsocketProvider
+interface WebsocketProvider {
+  wsconnected: boolean;
+  awareness: {
+    getStates: () => Map<number, unknown>;
+  };
+  destroy: () => void;
+}
 
 // Sample data for mentions
 const users = [
   { id: 1, label: 'John Doe' },
   { id: 2, label: 'Jane Smith' },
   { id: 3, label: 'Bob Johnson' },
-];
-
-// Configure the extension manager for this specific editor
-extensionManager
-  .configureExtension('placeholder', {
-    placeholder: 'Write something together...',
-  });
-
-// Add collaboration-specific extensions
-const collaborationExtensions = [
-  StarterKit.configure({
-    // Disable features that are handled by collaboration
-    history: false,
-  }),
-  Collaboration.configure({
-    document: ydoc,
-  }),
-  CollaborationCursor.configure({
-    provider,
-    user: {
-      name: 'User ' + Math.floor(Math.random() * 100),
-      color: '#' + Math.floor(Math.random() * 16777215).toString(16),
-    },
-  }),
-];
-
-// Get all extensions from the manager and add collaboration extensions
-const extensions = [
-  ...extensionManager.getExtensions(),
-  ...collaborationExtensions,
 ];
 
 // Editor controls component
@@ -60,13 +31,7 @@ const EditorControls = () => {
   }
 
   const addEmoji = (emoji: string) => {
-    // Check if the insertEmoji command exists
-    if (editor.commands.insertEmoji) {
-      editor.commands.insertEmoji(emoji);
-    } else {
-      // Fallback to insertContent
-      editor.commands.insertContent(emoji);
-    }
+    editor.commands.insertContent(emoji);
   };
 
   const addMention = (user: { id: number; label: string }) => {
@@ -77,13 +42,13 @@ const EditorControls = () => {
     <div className="editor-controls">
       <button
         onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive('customBold') ? 'is-active' : ''}
+        className={editor.isActive('bold') ? 'is-active' : ''}
       >
         Bold
       </button>
       <button
         onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive('customItalic') ? 'is-active' : ''}
+        className={editor.isActive('italic') ? 'is-active' : ''}
       >
         Italic
       </button>
@@ -163,32 +128,102 @@ const EditorControls = () => {
 
 // Editor component
 const CollaborativeEditor = () => {
-  const editorRef = useRef<HTMLDivElement>(null);
+  const [provider, setProvider] = useState<WebsocketProvider | null>(null);
+  const [ydoc, setYdoc] = useState<Y.Doc | null>(null);
+  const [extensions, setExtensions] = useState<Extension[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Cleanup function to destroy the provider when component unmounts
+    let wsProvider: WebsocketProvider | null = null;
+    let doc: Y.Doc | null = null;
+    
+    const initEditor = async () => {
+      try {
+        // Create Yjs document
+        doc = new Y.Doc();
+        setYdoc(doc);
+        console.log('Yjs document created');
+        
+        // Dynamically import y-websocket to avoid potential import issues
+        const yWebsocketModule = await import('y-websocket');
+        const WebsocketProviderClass = yWebsocketModule.WebsocketProvider;
+        
+        // Create WebSocket provider
+        wsProvider = new WebsocketProviderClass('ws://localhost:1235', 'tiptap-demo', doc);
+        setProvider(wsProvider);
+        console.log('WebSocket provider created');
+        
+        // Define extensions
+        const editorExtensions: Extension[] = [
+          StarterKit.configure({
+            // @ts-expect-error - history is a valid option but not in the type definition
+            history: false,
+          }),
+          Collaboration.configure({
+            document: doc,
+          }),
+          CollaborationCursor.configure({
+            provider: wsProvider,
+            user: {
+              name: 'User ' + Math.floor(Math.random() * 100),
+              color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+            },
+          }),
+        ];
+        
+        setExtensions(editorExtensions);
+        setLoading(false);
+        console.log('Extensions configured');
+      } catch (initError: unknown) {
+        console.error('Error initializing collaborative editor:', initError);
+        const errorMessage = initError instanceof Error ? initError.message : String(initError);
+        setError('Error initializing collaborative editor: ' + errorMessage);
+        setLoading(false);
+      }
+    };
+    
+    initEditor();
+    
+    // Cleanup function
     return () => {
-      provider.destroy();
+      console.log('Cleaning up resources');
+      if (wsProvider) {
+        wsProvider.destroy();
+      }
+      if (doc) {
+        doc.destroy();
+      }
     };
   }, []);
 
+  if (loading) {
+    return <div className="collaborative-editor">Loading editor...</div>;
+  }
+
+  if (error) {
+    return <div className="collaborative-editor">Error: {error}</div>;
+  }
+
+  if (!ydoc || !provider || extensions.length === 0) {
+    return <div className="collaborative-editor">Editor not properly initialized</div>;
+  }
+
   return (
     <div className="collaborative-editor">
-      <div ref={editorRef}>
-        <EditorProvider 
-          extensions={extensions} 
-          content="<p></p>"
-          slotBefore={<EditorControls />}
-        >
-          {/* The editor will be rendered here by the EditorProvider */}
-        </EditorProvider>
-      </div>
+      <EditorProvider 
+        extensions={extensions} 
+        content="<p>Start collaborating...</p>"
+        slotBefore={<EditorControls />}
+      >
+        {/* The editor will be rendered here by the EditorProvider */}
+      </EditorProvider>
       <div className="status-bar">
         <div className="connection-status">
           Connection status: {provider.wsconnected ? 'Connected' : 'Connecting...'}
         </div>
         <div className="user-count">
-          Users online: {Object.keys(provider.awareness.getStates()).length}
+          Users online: {provider.awareness ? Object.keys(provider.awareness.getStates()).length : 0}
         </div>
       </div>
     </div>

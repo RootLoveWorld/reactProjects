@@ -8,23 +8,22 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server": "node server/server.js"
+    "server": "node server/server.js",
+    "test-server": "node server/test-server.js",
+    "test-connection": "node server/test-connection.js"
   },
   "dependencies": {
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "@tiptap/react": "^3.4.2",
     "@tiptap/core": "^3.4.2",
-    "@tiptap/starter-kit":"^3.4.2",
-    "@tiptap/extension-bold": "^3.4.2",
-    "@tiptap/extension-italic": "^3.4.2",
-    "@tiptap/pm":"^3.4.2",
-    "@tiptap/suggestion":"^3.4.2",
+    "@tiptap/starter-kit": "^3.4.2",
     "yjs": "13.6.27",
     "y-websocket": "3.0.0",
     "@tiptap/extension-collaboration": "3.4.2",
     "@tiptap/extension-collaboration-cursor": "2.26.1",
-    "ws": "^8.18.0"
+    "ws": "^8.18.0",
+    "y-leveldb": "^0.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",

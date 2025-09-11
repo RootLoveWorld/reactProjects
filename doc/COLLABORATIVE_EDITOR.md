@@ -1,29 +1,13 @@
 # Collaborative Rich Text Editor with Tiptap and Yjs
 
-This project demonstrates a collaborative rich text editor built with Tiptap and Yjs using a plugin-based architecture for extensibility.
+This project demonstrates a collaborative rich text editor built with Tiptap and Yjs.
 
 ## Features
 
 1. **Real-time Collaboration**: Multiple users can edit the same document simultaneously
 2. **Presence Indicators**: See other users' cursors and selections
-3. **Plugin-based Architecture**: Extensible through custom extensions
-4. **Rich Text Editing**: Standard formatting options (bold, italic, headings, lists, etc.)
-5. **Advanced Features**: Emoji conversion, mentions, and custom extensions
-
-## Architecture
-
-The editor follows a plugin-based approach where functionality is added through extensions:
-
-- **Core Extensions**: Provided by Tiptap (StarterKit, Collaboration, etc.)
-- **Custom Extensions**: Built-in extensions for specific functionality
-- **Third-party Extensions**: Additional features from the Tiptap ecosystem
-
-## Extensions Included
-
-1. **CustomBold/CustomItalic**: Enhanced versions of basic formatting
-2. **Placeholder**: Shows placeholder text when editor is empty
-3. **EmojiExtension**: Converts text shortcuts to emojis (e.g., :) → 🙂)
-4. **MentionExtension**: Allows mentioning other users with @
+3. **Rich Text Editing**: Standard formatting options (bold, italic, headings, lists, etc.)
+4. **Advanced Features**: Emoji insertion and mentions
 
 ## How to Run
 
@@ -40,14 +24,6 @@ The editor follows a plugin-based approach where functionality is added through 
 3. **Open in Browser**:
    Visit `http://localhost:5173` (or the URL provided by Vite)
 
-## Customizing Extensions
-
-To add new functionality:
-
-1. Create a new extension in the `src/extensions` directory
-2. Extend from `BaseExtension` or directly from Tiptap's Extension/Node classes
-3. Add the extension to the `extensions` array in `CollaborativeEditor.tsx`
-
 ## Collaboration Features
 
 - **Real-time Sync**: Changes from other users appear instantly
@@ -55,41 +31,21 @@ To add new functionality:
 - **User Identification**: Each user has a unique name and color
 - **Conflict Resolution**: Yjs handles conflict resolution automatically
 
-## Extending Functionality
+## WebSocket Server Implementation
 
-The plugin-based architecture allows you to:
+The WebSocket server handles real-time communication between clients:
 
-1. **Modify existing behavior**: Extend core extensions with custom functionality
-2. **Add new features**: Implement completely new capabilities through extensions
-3. **Configure options**: Customize extension behavior through configuration
-4. **Share extensions**: Reuse extensions across different editor instances
+1. **Document Storage**: Documents are stored in memory (in production, use a database)
+2. **Message Handling**: Updates are broadcast to all connected clients
+3. **Room Support**: Multiple documents can be edited simultaneously using rooms
 
-## Example Extension Structure
+## Recent Changes
 
-```typescript
-import { Extension } from '@tiptap/core';
+Due to dependency limitations and runtime issues, we've made several improvements:
 
-const MyExtension = Extension.create({
-  name: 'myExtension',
-  
-  addOptions() {
-    return {
-      // Extension options
-    };
-  },
+1. **Dynamic Import**: Using dynamic import for y-websocket to avoid module loading issues
+2. **Better Error Handling**: Added proper error handling for initialization failures
+3. **Improved Server**: Enhanced WebSocket server with better error handling and Yjs protocol compliance
+4. **Resource Cleanup**: Ensured proper cleanup of resources when components unmount
 
-  addCommands() {
-    return {
-      // Custom commands
-    };
-  },
-
-  addKeyboardShortcuts() {
-    return {
-      // Keyboard shortcuts
-    };
-  },
-});
-
-export default MyExtension;
-```
+These changes resolve the "Cannot read properties of undefined (reading 'doc')" error and maintain the core functionality while working within the available dependencies.

@@ -1,5 +1,5 @@
 // ExtensionManager.ts
-import { AnyExtension } from '@tiptap/core';
+import { Extension } from '@tiptap/core';
 import { 
   CustomBold, 
   CustomItalic, 
@@ -12,13 +12,13 @@ import {
  * ExtensionManager provides a centralized way to manage and configure extensions
  */
 class ExtensionManager {
-  private extensions: AnyExtension[] = [];
+  private extensions: Extension[] = [];
   private config: Record<string, any> = {};
 
   /**
    * Add a single extension
    */
-  addExtension(extension: AnyExtension): this {
+  addExtension(extension: Extension): this {
     this.extensions.push(extension);
     return this;
   }
@@ -26,7 +26,7 @@ class ExtensionManager {
   /**
    * Add multiple extensions
    */
-  addExtensions(extensions: AnyExtension[]): this {
+  addExtensions(extensions: Extension[]): this {
     this.extensions.push(...extensions);
     return this;
   }
@@ -50,7 +50,7 @@ class ExtensionManager {
   /**
    * Get all extensions with their configurations
    */
-  getExtensions(): AnyExtension[] {
+  getExtensions(): Extension[] {
     return this.extensions.map(ext => {
       if (this.config[ext.name]) {
         return ext.configure(this.config[ext.name]);
@@ -69,7 +69,7 @@ class ExtensionManager {
   /**
    * Get extension by name
    */
-  getExtension(name: string): AnyExtension | undefined {
+  getExtension(name: string): Extension | undefined {
     return this.extensions.find(ext => ext.name === name);
   }
 
